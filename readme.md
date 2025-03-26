@@ -14,7 +14,7 @@ Imace uses the CLIP model to encode your images and search queries, allowing for
 
 ## Disclaimer
 
-**Warning:** This code was lovingly crafted (and slightly panicked over) in 3-hour. Proceed with caution and a sense of humor! 😅 If you find any bugs, please submit an issue (or better yet, a pull request with a fix!).
+**Warning:** This code was lovingly crafted (and slightly panicked over). Proceed with caution and a sense of humor! 😅 If you find any bugs, please submit an issue (or better yet, a pull request with a fix!).
 
 ## Running the project
 
