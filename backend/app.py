@@ -232,7 +232,25 @@ async def get_paginated_images(page: int = 1, page_size: int = 12):
         "page": page,
         "page_size": page_size
     }
+
+@app.get("/storage_size")
+async def get_storage_size():
+    """Calculate the total storage size of all images in bytes"""
+    total_size = 0
     
+    try:
+        for filename in os.listdir(UPLOAD_FOLDER):
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            if os.path.isfile(file_path):
+                total_size += os.path.getsize(file_path)
+        
+        # Add database size
+        db_size = os.path.getsize("images.db")
+        total_size += db_size
+        
+        return {"size_bytes": total_size}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating storage size: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
