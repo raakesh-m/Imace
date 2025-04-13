@@ -10,7 +10,7 @@ import useImageStore from "../store/useImageStore";
 
 export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
-  const { fetchAllImages, fetchImagePoints } = useImageStore();
+  const { fetchAllImages, fetchImagePoints, setSelectedFiles, handleUpload } = useImageStore();
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -21,6 +21,14 @@ export default function Home() {
   const handleUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFiles(Array.from(event.target.files));
+      await handleUpload();
+      fetchAllImages();
     }
   };
 
@@ -67,6 +75,7 @@ export default function Home() {
               style={{ display: "none" }}
               multiple
               accept="image/*"
+              onChange={handleFileChange}
             />
             <motion.button
               className="flex items-center space-x-2 bg-white hover:bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all shadow-sm"

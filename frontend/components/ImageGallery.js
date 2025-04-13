@@ -115,7 +115,6 @@ export default function ImageGallery() {
 
   const openImageModal = (image) => {
     setSelectedImage(image);
-    document.body.style.overflow = 'hidden';
     
     // Set image details for the modal
     if (searchResults.length > 0) {
@@ -129,7 +128,6 @@ export default function ImageGallery() {
   const closeImageModal = () => {
     setSelectedImage(null);
     setSelectedImageDetails(null);
-    document.body.style.overflow = '';
   };
 
   // Calculate column classes based on layout
@@ -140,6 +138,98 @@ export default function ImageGallery() {
       // Masonry-like layout
       return "columns-1 sm:columns-2 md:columns-3 lg:columns-3 xl:columns-4 gap-4 space-y-4";
     }
+  };
+
+  // Modal component
+  const ImageModal = () => {
+    if (!selectedImage || !selectedImageDetails) return null;
+    
+    return (
+      <>
+        {/* Backdrop */}
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+          onClick={closeImageModal}
+        />
+        
+        {/* Modal container - scrollable */}
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <motion.div
+              className="relative w-full max-w-5xl rounded-xl bg-white shadow-2xl overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", bounce: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-4 right-4 z-10 flex gap-2">
+                <button 
+                  className="bg-black/20 hover:bg-black/40 p-2 rounded-full text-white transition-colors backdrop-blur-sm"
+                  onClick={closeImageModal}
+                  aria-label="Close"
+                >
+                  <FiX />
+                </button>
+              </div>
+              
+              <div className="flex flex-col md:flex-row">
+                <div className="flex-1 bg-gray-900 flex items-center justify-center p-4">
+                  <img 
+                    src={`http://127.0.0.1:8000/image/${encodeURIComponent(
+                      typeof selectedImage === 'string' ? selectedImage : selectedImage.path
+                    )}`}
+                    alt="Selected image" 
+                    className="max-h-[70vh] max-w-full object-contain rounded-lg"
+                  />
+                </div>
+                
+                <div className="w-full md:w-80 p-6 bg-white overflow-y-auto flex flex-col">
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">Image Details</h3>
+                  
+                  <div className="space-y-4 flex-1">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">Filename</h4>
+                      <p className="text-gray-900 break-all">
+                        {typeof selectedImage === 'string' ? selectedImage : selectedImage.path}
+                      </p>
+                    </div>
+                    
+                    {selectedImageDetails.similarity && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">Match Score</h4>
+                        <div className="flex items-center mt-1">
+                          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="bg-indigo-600 h-2 rounded-full" 
+                              style={{ width: `${selectedImageDetails.similarity}%` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2 text-indigo-600 font-medium">
+                            {selectedImageDetails.similarity.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2 mt-6 border-t pt-4">
+                    <button className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-lg flex items-center justify-center gap-1 transition-colors">
+                      <FiDownload size={16} />
+                      <span>Download</span>
+                    </button>
+                    <button className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg flex items-center justify-center gap-1 transition-colors">
+                      <FiShare2 size={16} />
+                      <span>Share</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -338,89 +428,9 @@ export default function ImageGallery() {
         </motion.div>
       )}
 
-      {/* Image Modal */}
+      {/* Replace the modal section with the new component */}
       <AnimatePresence>
-        {selectedImage && selectedImageDetails && (
-          <motion.div 
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeImageModal}
-          >
-            <motion.div
-              className="relative max-w-5xl max-h-[90vh] w-full bg-white rounded-xl overflow-hidden shadow-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", bounce: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="absolute top-4 right-4 z-10 flex gap-2">
-                <button 
-                  className="bg-black/20 hover:bg-black/40 p-2 rounded-full text-white transition-colors backdrop-blur-sm"
-                  onClick={closeImageModal}
-                  aria-label="Close"
-                >
-                  <FiX />
-                </button>
-              </div>
-              
-              <div className="flex flex-col md:flex-row h-full">
-                <div className="flex-1 bg-gray-900 flex items-center justify-center p-4">
-                  <img 
-                    src={`http://127.0.0.1:8000/image/${encodeURIComponent(
-                      typeof selectedImage === 'string' ? selectedImage : selectedImage.path
-                    )}`}
-                    alt="Selected image" 
-                    className="max-h-[70vh] max-w-full object-contain rounded-lg"
-                  />
-                </div>
-                
-                <div className="w-full md:w-80 p-6 bg-white overflow-y-auto flex flex-col">
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">Image Details</h3>
-                  
-                  <div className="space-y-4 flex-1">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">Filename</h4>
-                      <p className="text-gray-900 break-all">
-                        {typeof selectedImage === 'string' ? selectedImage : selectedImage.path}
-                      </p>
-                    </div>
-                    
-                    {selectedImageDetails.similarity && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Match Score</h4>
-                        <div className="flex items-center mt-1">
-                          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                            <div 
-                              className="bg-indigo-600 h-2 rounded-full" 
-                              style={{ width: `${selectedImageDetails.similarity}%` }}
-                            ></div>
-                          </div>
-                          <span className="ml-2 text-indigo-600 font-medium">
-                            {selectedImageDetails.similarity.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2 mt-6 border-t pt-4">
-                    <button className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-2 rounded-lg flex items-center justify-center gap-1 transition-colors">
-                      <FiDownload size={16} />
-                      <span>Download</span>
-                    </button>
-                    <button className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg flex items-center justify-center gap-1 transition-colors">
-                      <FiShare2 size={16} />
-                      <span>Share</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+        {selectedImage && <ImageModal />}
       </AnimatePresence>
     </section>
   );
